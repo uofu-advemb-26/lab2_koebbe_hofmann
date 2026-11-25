@@ -7,9 +7,3 @@ bool blink_next_state(bool on, int *count)
     // shift the position of the long gap by one blink.
     return ((*count)++ % BLINK_PERIOD) ? !on : on;
 }
-
-bool blink_step(bool on, int *count, led_put_fn led_put)
-{
-    led_put(on);
-    return blink_next_state(on, count);
-}

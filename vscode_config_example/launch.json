@@ -63,30 +63,6 @@
             },
             "preLaunchTask": "Flash",
             "svdPath": "${userHome}/.pico-sdk/sdk/2.0.0/src/${command:raspberry-pi-pico.getChip}/hardware_regs/${command:raspberry-pi-pico.getChip}.svd"
-        },
-        {
-            "name": "Renode Debug (C++ Debugger)",
-            "type": "cppdbg",
-            "request": "launch",
-            "cwd": "${workspaceRoot}",
-            "program": "${command:cmake.launchTargetPath}",
-            "MIMode": "gdb",
-            "miDebuggerPath": "${command:raspberry-pi-pico.getGDBPath}",
-            "miDebuggerServerAddress": "localhost:3333",
-            "debugServerPath": "/opt/renode/bin/renode",
-            "debugServerArgs": "-e \"$ELF=@${command:cmake.launchTargetPath}; $WORKING=@${workspaceFolder}; include @${workspaceFolder}/simulate.resc\"",
-            "serverStarted": "GDB server with .* started",
-            "serverLaunchTimeout": 30000,
-            "filterStdout": true,
-            "filterStderr": true,
-            "osx": {
-                "debugServerPath": "/Applications/Renode.app/Contents/MacOS/macos_run.command"
-            },
-            "windows": {
-                "debugServerPath": "Renode.exe"
-            },
-            "preLaunchTask": "Compile Project",
-            "svdPath": "${userHome}/.pico-sdk/sdk/2.0.0/src/${command:raspberry-pi-pico.getChip}/hardware_regs/${command:raspberry-pi-pico.getChip}.svd"
         }
     ]
 }

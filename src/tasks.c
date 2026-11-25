@@ -24,7 +24,8 @@ void blink_task(__unused void *params) {
     int count = 0;
     bool on = false;
     while (true) {
-        on = blink_step(on, &count, led_put);
+        led_put(on);
+        on = blink_next_state(on, &count);
         vTaskDelay(BLINK_DELAY_TICKS);
     }
 }

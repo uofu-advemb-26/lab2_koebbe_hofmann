@@ -8,7 +8,7 @@
  * before these are called.
  */
 
-// Drive the LED. Matches led_put_fn in blink.h so it can be injected.
+// Drive the LED.
 void led_put(bool on);
 
 // Read back the LED state from the CYW43.

@@ -1,8 +1,3 @@
-/*
- * Unit tests for the hardware-independent logic in src/blink.c and
- * src/case_swap.c. Nothing here touches the CYW43 or FreeRTOS, so these
- * tests run on the Pico, in Renode, and in CI.
- */
 #include <stdio.h>
 #include <stdbool.h>
 #include <pico/stdlib.h>
@@ -11,26 +6,11 @@
 #include "blink.h"
 #include "case_swap.h"
 
-/* ---- Fake LED: records every value blink_step() writes. ---- */
-#define FAKE_LED_MAX 64
-static bool fake_led_writes[FAKE_LED_MAX];
-static int fake_led_write_count;
-
-static void fake_led_put(bool on)
-{
-    if (fake_led_write_count < FAKE_LED_MAX)
-        fake_led_writes[fake_led_write_count] = on;
-    fake_led_write_count++;
-}
-
-void setUp(void)
-{
-    fake_led_write_count = 0;
-}
+void setUp(void) {}
 
 void tearDown(void) {}
 
-/* ---- switch_case ---- */
+// switch_case
 
 void test_switch_case_lower_to_upper(void)
 {
@@ -71,7 +51,7 @@ void test_switch_case_round_trip(void)
         TEST_ASSERT_EQUAL_CHAR((char)i, switch_case(switch_case((char)i)));
 }
 
-/* ---- blink_next_state ---- */
+// blink_next_state
 
 void test_blink_first_iteration_does_not_toggle(void)
 {
@@ -109,19 +89,9 @@ void test_blink_holds_when_count_multiple_of_period(void)
     }
 }
 
-/* ---- blink_step (with the injected fake LED) ---- */
+// Blink sequence 
 
-void test_blink_step_writes_current_state_once(void)
-{
-    int count = 1;
-    bool next = blink_step(true, &count, fake_led_put);
-    TEST_ASSERT_EQUAL_INT(1, fake_led_write_count);
-    TEST_ASSERT_TRUE(fake_led_writes[0]);   // writes `on`, not the next state
-    TEST_ASSERT_FALSE(next);
-    TEST_ASSERT_EQUAL_INT(2, count);
-}
-
-void test_blink_step_matches_original_sequence(void)
+void test_blink_matches_original_sequence(void)
 {
     // Characterization test: LED values written by the original,
     // pre-refactor loop in hello_freertos.c, starting from reset
@@ -134,21 +104,19 @@ void test_blink_step_matches_original_sequence(void)
     const int n = sizeof expected / sizeof expected[0];
     int count = 0;
     bool on = false;
-    for (int i = 0; i < n; i++)
-        on = blink_step(on, &count, fake_led_put);
-
-    TEST_ASSERT_EQUAL_INT(n, fake_led_write_count);
-    for (int i = 0; i < n; i++)
-        TEST_ASSERT_EQUAL_MESSAGE(expected[i], fake_led_writes[i],
+    for (int i = 0; i < n; i++) {
+        TEST_ASSERT_EQUAL_MESSAGE(expected[i], on,
                                   "LED sequence differs from original code");
+        on = blink_next_state(on, &count);
+    }
 }
 
 int main(void)
 {
     stdio_init_all();
-    // Repeat forever instead of exiting: on WSL/usbipd the serial port can
-    // take several seconds to reach the host after reboot, so a single run
-    // is easily missed. Reflash with `picotool load -f`.
+    // Repeat forever instead of exiting: whatever reads the serial port (a
+    // terminal, or the CI checker on the debug probe UART) can attach after
+    // the first run has printed, so a single run is easily missed.
     while (true) {
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
@@ -162,8 +130,7 @@ int main(void)
         RUN_TEST(test_blink_increments_count);
         RUN_TEST(test_blink_toggles_when_count_not_multiple_of_period);
         RUN_TEST(test_blink_holds_when_count_multiple_of_period);
-        RUN_TEST(test_blink_step_writes_current_state_once);
-        RUN_TEST(test_blink_step_matches_original_sequence);
+        RUN_TEST(test_blink_matches_original_sequence);
         UNITY_END();
     }
 }

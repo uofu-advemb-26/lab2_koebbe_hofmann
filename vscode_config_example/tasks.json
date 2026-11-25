@@ -56,26 +56,6 @@
             "windows": {
                 "command": "openocd"
             }
-        },
-        {
-            "label": "Simulate",
-            "type": "shell",
-            "command": "renode",
-            "args": [
-                "-e",
-                "$ELF=@${command:cmake.launchTargetPath}; $WORKING=@${workspaceFolder}; include @${workspaceFolder}/simulate.resc"
-            ],
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated"
-            },
-            "problemMatcher": [],
-            "osx": {
-                "command": "/Applications/Renode.app/Contents/MacOS/macos_run.command",
-            },
-            "windows": {
-                "command": "${env:USERPROFILE}/Renode.exe"
-            }
         }
     ]
 }
